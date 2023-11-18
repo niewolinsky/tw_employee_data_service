@@ -12,52 +12,44 @@ import (
 	"time"
 )
 
-func (app *application) serve(app_port string) error {
+func (app *application) serveREST(port string) error {
 	srv := http.Server{
-		//add TLS config
-		Addr:         fmt.Sprintf(":%s", app_port),
+		Addr:         fmt.Sprintf(":%s", port),
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
 
-	shutdown_signal := make(chan error)
+	// Channel to signal when the shutdown is complete
+	shutdownDone := make(chan struct{})
 
 	go func() {
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 		s := <-quit
-		slog.Info(fmt.Sprintf("shutdown signal: %s", s.String()))
+		slog.Info(fmt.Sprintf("shutdown signal received: %s", s.String()))
+
+		// Shutdown the server with a timeout
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		err := srv.Shutdown(ctx)
-		if err != nil {
-			shutdown_signal <- err
+		if err := srv.Shutdown(ctx); err != nil {
+			slog.Error("error during server shutdown:", err)
+		} else {
+			slog.Info("server gracefully shutdown")
 		}
 
-		slog.Info("waiting for background tasks to finish")
-
-		app.wait_group.Wait()
-		shutdown_signal <- nil
+		close(shutdownDone)
 	}()
 
-	slog.Info("starting server")
-	err := srv.ListenAndServe()
-	if err != nil {
-		switch {
-		case errors.Is(err, http.ErrServerClosed):
-			return nil
-		default:
-			return err
-		}
-	}
-
-	err = <-shutdown_signal
-	if err != nil {
+	slog.Info(fmt.Sprintf("Starting REST server on port %s", port))
+	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 
+	// Wait for shutdown to complete
+	<-shutdownDone
+	slog.Info("shutdown complete")
 	return nil
 }

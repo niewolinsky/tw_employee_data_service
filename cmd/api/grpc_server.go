@@ -1,25 +1,25 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"net"
 
-	employeeService "github.com/niewolinsky/tw_employee_data_service/internal/grpc/employee"
+	pb "github.com/niewolinsky/tw_employee_data_service/internal/grpc/employee"
 	"google.golang.org/grpc"
 )
 
-func startGrpcServer() {
-	lis, err := net.Listen("tcp", ":50051") // Replace with your desired port
+func (app *application) serveGRPC(port string) error {
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		return err
 	}
+
 	grpcServer := grpc.NewServer()
-	employeeServiceServer := employeeService.NewEmployeeServiceServer()
+	employeeServiceServer := pb.NewEmployeeServiceServer(app.data_access)
 
-	employeeService.RegisterEmployeeServiceServer(grpcServer, employeeServiceServer)
+	pb.RegisterEmployeeServiceServer(grpcServer, employeeServiceServer)
 
-	log.Println("Starting gRPC server on port 50051")
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
+	slog.Info(fmt.Sprintf("Starting gRPC server on port %s", port))
+	return grpcServer.Serve(lis)
 }

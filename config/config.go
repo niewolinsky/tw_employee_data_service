@@ -13,10 +13,11 @@ import (
 )
 
 type configuration struct {
-	version string
-	port    string
-	env     string
-	db      struct {
+	version           string
+	rest_api_portport string
+	grpc_api_port     string
+	env               string
+	db                struct {
 		dsn string
 	}
 }
@@ -36,7 +37,7 @@ func initializeMySQLClient(cfg configuration) (*sql.DB, error) {
 	return db, nil
 }
 
-func InitConfig() (*sql.DB, string) {
+func InitConfig() (*sql.DB, string, string) {
 	config := configuration{}
 
 	err := godotenv.Load()
@@ -46,11 +47,12 @@ func InitConfig() (*sql.DB, string) {
 	slog.Info("environment variables loaded")
 
 	//?APP
-	flag.StringVar(&config.port, "port", os.Getenv("APP_PORT"), "application server port")
+	flag.StringVar(&config.rest_api_portport, "rest_api_port", os.Getenv("REST_API_PORT"), "application server port")
+	flag.StringVar(&config.grpc_api_port, "grpc_api_port", os.Getenv("GRPC_API_PORT"), "application server port")
 	flag.StringVar(&config.version, "version", os.Getenv("APP_VERSION"), "application version")
 	flag.StringVar(&config.env, "env", os.Getenv("APP_ENVIRONMENT"), "application environment")
 
-	//?MySQL
+	//?MYSQL
 	flag.StringVar(&config.db.dsn, "db-dsn", os.Getenv("MYSQL_DSN"), "mysql dsn")
 
 	flag.Parse()
@@ -62,5 +64,5 @@ func InitConfig() (*sql.DB, string) {
 	}
 	slog.Info("MySQL client initialized")
 
-	return mysqlClient, config.port
+	return mysqlClient, config.rest_api_portport, config.grpc_api_port
 }

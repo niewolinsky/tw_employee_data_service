@@ -17,7 +17,7 @@ type application struct {
 }
 
 func main() {
-	mysql_client, app_port := config.InitConfig()
+	mysql_client, rest_api_port, grpc_api_port := config.InitConfig()
 	defer mysql_client.Close()
 
 	app := &application{
@@ -25,9 +25,18 @@ func main() {
 		validator:   validator.New(),
 	}
 
-	err := app.serve(app_port)
+	//? start HTTP server in a goroutine to serve both HTTP and GRPC
+	go func() {
+		err := app.serveREST(rest_api_port)
+		if err != nil {
+			slog.Error("failed starting HTTP server", err)
+		}
+	}()
+
+	err := app.serveGRPC(grpc_api_port)
 	if err != nil {
-		slog.Error("failed starting server", err)
+		slog.Error("failed starting gRPC server", err)
 	}
+
 	slog.Info("stopped server")
 }
