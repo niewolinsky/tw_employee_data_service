@@ -17,11 +17,11 @@ type application struct {
 }
 
 func main() {
-	postgres_client, app_port := config.InitConfig()
-	defer postgres_client.Close()
+	mysql_client, app_port := config.InitConfig()
+	defer mysql_client.Close()
 
 	app := &application{
-		data_access: data.New(postgres_client),
+		data_access: data.New(mysql_client),
 		validator:   validator.New(),
 	}
 

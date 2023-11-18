@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"math"
 
 	data "github.com/niewolinsky/tw_employee_data_service/data"
@@ -13,15 +14,20 @@ import (
 )
 
 func (app *application) hdlGetEmployee(w http.ResponseWriter, r *http.Request) {
-	place_id_str := chi.URLParam(r, "place_id")
-	place_id, err := strconv.Atoi(place_id_str)
+	employee_id_str := chi.URLParam(r, "employee_id")
+	employee_id, err := strconv.Atoi(employee_id_str)
 	if err != nil {
 		util.BadRequestResponse(w, r, err)
 		return
 	}
 
-	employee, err := app.data_access.GetEmployee(r.Context(), int32(place_id))
+	employee, err := app.data_access.GetEmployee(r.Context(), int32(employee_id))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			util.NotFoundResponse(w, r)
+			return
+		}
+
 		util.ServerErrorResponse(w, r, err)
 		return
 	}
@@ -121,6 +127,11 @@ func (app *application) hdlPutEmployee(w http.ResponseWriter, r *http.Request) {
 
 	_, err = app.data_access.GetEmployee(r.Context(), int32(employee_id))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			util.NotFoundResponse(w, r)
+			return
+		}
+
 		util.ServerErrorResponse(w, r, err)
 		return
 	}
