@@ -86,7 +86,19 @@ func (app *application) hdlPostEmployee(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	employee, err := app.data_access.CreateEmployee(r.Context(), input)
+	result, err := app.data_access.CreateEmployee(r.Context(), input)
+	if err != nil {
+		util.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	result_id, err := result.LastInsertId()
+	if err != nil {
+		util.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	employee, err := app.data_access.GetEmployee(r.Context(), int32(result_id))
 	if err != nil {
 		util.ServerErrorResponse(w, r, err)
 		return
@@ -128,7 +140,19 @@ func (app *application) hdlPutEmployee(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	employee, err := app.data_access.UpdateEmployee(r.Context(), input)
+	result, err := app.data_access.UpdateEmployee(r.Context(), input)
+	if err != nil {
+		util.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	result_id, err := result.LastInsertId()
+	if err != nil {
+		util.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	employee, err := app.data_access.GetEmployee(r.Context(), int32(result_id))
 	if err != nil {
 		util.ServerErrorResponse(w, r, err)
 		return
