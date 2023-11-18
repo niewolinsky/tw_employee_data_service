@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"math"
 
+	"github.com/niewolinsky/customerimporter"
 	data "github.com/niewolinsky/tw_employee_data_service/data"
 	util "github.com/niewolinsky/tw_employee_data_service/utils"
 
@@ -115,6 +116,45 @@ func (app *application) hdlPostEmployee(w http.ResponseWriter, r *http.Request) 
 		util.ServerErrorResponse(w, r, err)
 		return
 	}
+}
+
+func (app *application) hdlPostEmployeeCSV(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(32 << 20) // 32MB is the default max memory size
+	if err != nil {
+		util.BadRequestResponse(w, r, err)
+		return
+	}
+
+	// Retrieve the file from the form data
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		util.BadRequestResponse(w, r, err)
+		return
+	}
+	defer file.Close()
+
+	customers, err := customerimporter.ReadCustomersFromCSV(file)
+	if err != nil {
+		util.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	for _, customer := range customers {
+		input := data.CreateEmployeeParams{
+			FirstName: customer.FirstName,
+			LastName:  customer.LastName,
+			Email:     string(customer.Email),
+			IpAddress: customer.IPAddress.String(),
+		}
+
+		_, err := app.data_access.CreateEmployee(r.Context(), input)
+		if err != nil {
+			util.ServerErrorResponse(w, r, err)
+			return
+		}
+	}
+
+	util.WriteJSON(w, http.StatusOK, util.Wrap{"status": "file processed successfully"}, nil)
 }
 
 func (app *application) hdlPutEmployee(w http.ResponseWriter, r *http.Request) {

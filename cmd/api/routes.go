@@ -26,6 +26,7 @@ func (app *application) routes() http.Handler {
 	router.Get("/v1/employee/{employee_id}", app.hdlGetEmployee)
 	router.Get("/v1/employee", app.hdlListEmployee)
 	router.Post("/v1/employee", app.hdlPostEmployee)
+	router.Post("/v1/employee/upload", app.hdlPostEmployeeCSV)
 	router.Put("/v1/employee/{employee_id}", app.hdlPutEmployee)
 	router.Delete("/v1/employee/{employee_id}", app.hdlDeleteEmployee)
 
