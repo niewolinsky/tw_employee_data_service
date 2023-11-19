@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net"
 
-	pb "github.com/niewolinsky/tw_employee_data_service/internal/grpc/employee"
+	pb "github.com/niewolinsky/tw_employee_data_service/grpc/employee"
 	"google.golang.org/grpc"
 )
 
