@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	config "github.com/niewolinsky/tw_employee_data_service/config"
 	data "github.com/niewolinsky/tw_employee_data_service/data"
 
@@ -18,6 +20,7 @@ type application struct {
 
 func main() {
 	_, rest_api_port, _ := config.InitConfig()
+	fmt.Println("test1")
 	// defer mysql_client.Close()
 
 	app := &application{
