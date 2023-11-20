@@ -21,7 +21,7 @@ func main() {
 	defer mysqlClient.Close()
 
 	app := &application{
-		data_access: nil,
+		data_access: data.New(mysqlClient),
 		validator:   validator.New(),
 	}
 
