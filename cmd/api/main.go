@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/niewolinsky/tw_employee_data_service/config"
 	data "github.com/niewolinsky/tw_employee_data_service/data"
 
 	"log/slog"
@@ -18,27 +17,26 @@ type application struct {
 }
 
 func main() {
-	// _, rest_api_port, _ := config.InitConfig()
-	fmt.Println("test1")
-	// defer mysql_client.Close()
+	mysqlClient, restApiPort, grpcApiPort := config.InitConfig()
+	defer mysqlClient.Close()
 
 	app := &application{
 		data_access: nil,
 		validator:   validator.New(),
 	}
 
-	//? start HTTP server in a goroutine to serve both HTTP and GRPC
-	// go func() {
-	err := app.serveREST("4000")
-	if err != nil {
-		slog.Error("failed starting HTTP server", err)
-	}
-	// }()
+	// ? start HTTP server in a goroutine to serve both HTTP and GRPC
+	go func() {
+		err := app.serveREST(restApiPort)
+		if err != nil {
+			slog.Error("failed starting HTTP server", err)
+		}
+	}()
 
-	// err := app.serveGRPC(grpc_api_port)
-	// if err != nil {
-	// 	slog.Error("failed starting gRPC server", err)
-	// }
+	err := app.serveGRPC(grpcApiPort)
+	if err != nil {
+		slog.Error("failed starting gRPC server", err)
+	}
 
 	slog.Info("stopped server")
 }
