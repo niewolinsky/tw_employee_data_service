@@ -17,11 +17,11 @@ type application struct {
 }
 
 func main() {
-	mysql_client, rest_api_port, grpc_api_port := config.InitConfig()
-	defer mysql_client.Close()
+	_, rest_api_port, _ := config.InitConfig()
+	// defer mysql_client.Close()
 
 	app := &application{
-		data_access: data.New(mysql_client),
+		data_access: nil,
 		validator:   validator.New(),
 	}
 
@@ -33,10 +33,10 @@ func main() {
 		}
 	}()
 
-	err := app.serveGRPC(grpc_api_port)
-	if err != nil {
-		slog.Error("failed starting gRPC server", err)
-	}
+	// err := app.serveGRPC(grpc_api_port)
+	// if err != nil {
+	// 	slog.Error("failed starting gRPC server", err)
+	// }
 
 	slog.Info("stopped server")
 }
