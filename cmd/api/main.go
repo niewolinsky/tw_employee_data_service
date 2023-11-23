@@ -27,15 +27,15 @@ func main() {
 
 	// ? start HTTP server in a goroutine to serve both HTTP and GRPC
 	go func() {
-		err := app.serveREST(restApiPort)
+		err := app.serveGRPC(grpcApiPort)
 		if err != nil {
-			slog.Error("failed starting HTTP server", err)
+			slog.Error("failed starting gRPC server", err)
 		}
 	}()
 
-	err := app.serveGRPC(grpcApiPort)
+	err := app.serveREST(restApiPort)
 	if err != nil {
-		slog.Error("failed starting gRPC server", err)
+		slog.Error("failed starting HTTP server", err)
 	}
 
 	slog.Info("stopped server")

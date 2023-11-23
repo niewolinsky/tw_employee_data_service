@@ -10,4 +10,13 @@ sql:
         emit_exact_table_names: true
         emit_json_tags: true
         emit_interface: true
+        overrides:
+          - column: "employees.first_name"
+            go_struct_tag: 'validate:"required,alpha"'
+          - column: "employees.last_name"
+            go_struct_tag: 'validate:"required,alpha"'
+          - column: "employees.email"
+            go_struct_tag: 'validate:"required,email"'
+          - column: "employees.ip_address"
+            go_struct_tag: 'validate:"required,ipv4"'
 

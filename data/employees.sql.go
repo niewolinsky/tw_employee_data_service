@@ -19,10 +19,10 @@ INSERT INTO employees (
 `
 
 type CreateEmployeeParams struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	IpAddress string `json:"ip_address"`
+	FirstName string `json:"first_name" validate:"required,alpha"`
+	LastName  string `json:"last_name" validate:"required,alpha"`
+	Email     string `json:"email" validate:"required,email"`
+	IpAddress string `json:"ip_address" validate:"required,ipv4"`
 }
 
 func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) (sql.Result, error) {
@@ -114,10 +114,10 @@ WHERE employee_id = ?
 `
 
 type UpdateEmployeeParams struct {
-	FirstName  string `json:"first_name"`
-	LastName   string `json:"last_name"`
-	Email      string `json:"email"`
-	IpAddress  string `json:"ip_address"`
+	FirstName  string `json:"first_name" validate:"required,alpha"`
+	LastName   string `json:"last_name" validate:"required,alpha"`
+	Email      string `json:"email" validate:"required,email"`
+	IpAddress  string `json:"ip_address" validate:"required,ipv4"`
 	EmployeeID int32  `json:"employee_id"`
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 func (app *application) serveGRPC(port string) error {
-	lis, err := net.Listen("tcp", ":"+port)
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return err
 	}
@@ -21,5 +21,5 @@ func (app *application) serveGRPC(port string) error {
 	pb.RegisterEmployeeServiceServer(grpcServer, employeeServiceServer)
 
 	slog.Info(fmt.Sprintf("Starting gRPC server on port %s", port))
-	return grpcServer.Serve(lis)
+	return grpcServer.Serve(listen)
 }

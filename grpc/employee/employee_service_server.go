@@ -10,23 +10,19 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Ensure that employeeServiceServer implements the EmployeeServiceServer interface
 var _ EmployeeServiceServer = (*employeeServiceServer)(nil)
 
-// employeeServiceServer implements the EmployeeServiceServer interface
 type employeeServiceServer struct {
-	UnimplementedEmployeeServiceServer               // Embedding this struct is necessary
-	dataAccess                         *data.Queries // Assuming you have a Queries struct for database operations
+	UnimplementedEmployeeServiceServer
+	dataAccess *data.Queries
 }
 
-// NewEmployeeServiceServer creates a new employeeServiceServer
 func NewEmployeeServiceServer(dataAccess *data.Queries) EmployeeServiceServer {
 	return &employeeServiceServer{
 		dataAccess: dataAccess,
 	}
 }
 
-// GetEmployee handles the GetEmployee gRPC call
 func (s *employeeServiceServer) GetEmployee(ctx context.Context, req *GetEmployeeRequest) (*EmployeeResponse, error) {
 	employee, err := s.dataAccess.GetEmployee(ctx, req.GetEmployeeId())
 	if err != nil {
@@ -46,7 +42,6 @@ func (s *employeeServiceServer) GetEmployee(ctx context.Context, req *GetEmploye
 	}, nil
 }
 
-// ListEmployees handles the ListEmployees gRPC call
 func (s *employeeServiceServer) ListEmployees(ctx context.Context, req *ListEmployeesRequest) (*ListEmployeesResponse, error) {
 	employees, err := s.dataAccess.ListEmployees(ctx, data.ListEmployeesParams{Limit: req.GetLimit(), Offset: req.GetOffset()})
 	if err != nil {
